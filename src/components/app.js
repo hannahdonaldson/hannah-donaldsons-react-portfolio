@@ -6,11 +6,12 @@ import {
 } from 'react-router-dom'
 import axios from 'axios'
 
-import NavigationContainer from "./navigation/navigation-container";
+import NavigationComponent from "./navigation/navigation-container";
 import Home from "./pages/home";
 import About from "./pages/about";
 import Contact from "./pages/contact";
 import Blog from "./pages/blog";
+import PortfolioManager from "./pages/portfolio-manager";
 import PortfolioDetail from "./portfolio/portfolio-detail";
 import Auth from "./pages/auth";
 import NoMatch from "./pages/no-match";
@@ -24,6 +25,7 @@ export default class App extends Component {
 		}
 		this.handleSuccessfullLogin = this.handleSuccessfullLogin.bind(this);
 		this.handleUnsuccessfullLogin = this.handleUnsuccessfullLogin.bind(this);
+		this.handleSuccessfullLogout = this.handleSuccessfullLogout.bind(this);
 	}
 
 	handleSuccessfullLogin() {
@@ -33,6 +35,12 @@ export default class App extends Component {
 	}
 
 	handleUnsuccessfullLogin() {
+		this.setState({
+			loggedInStatus: "NOT_LOGGED_IN"
+		})
+	}
+
+	handleSuccessfullLogout() {
 		this.setState({
 			loggedInStatus: "NOT_LOGGED_IN"
 		})
@@ -71,15 +79,23 @@ export default class App extends Component {
 		this.checkLoginStatus();
 	}
 
+	authorizedPages() {
+		return [
+			<Route path = "/portfolio-manager" component = {PortfolioManager} />
+		]
+	}
+
 
 	render() {
+		
 		return (
 			<div className='contianer'>
 				<Router>
 					<div>
-					<NavigationContainer />
-
-					<h2>{this.state.loggedInStatus}</h2>
+					<NavigationComponent 
+					loggedInStatus={this.state.loggedInStatus}
+					handleSuccessfullLogout = {this.handleSuccessfullLogout}
+					/>
 
 					<Switch>
 						<Route exact path = "/" component = {Home} />
@@ -98,6 +114,7 @@ export default class App extends Component {
 						<Route path = "/about-me" component = {About} />
 						<Route path = "/contact" component = {Contact} />
 						<Route path = "/blog" component = {Blog} />
+						{this.state.loggedInStatus === "LOGGED_IN" ? this.authorizedPages() : null}
 						<Route exact path = "/portfolio/:slug" component = {PortfolioDetail} />
 						<Route component = {NoMatch} />
 					</Switch> {/*- Use the <Switch> component to group <Route>s. The <Switch> will iterate over its children elements (the routes) and only render the first one that matches the current pathname.*/}
